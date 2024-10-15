@@ -1,0 +1,31 @@
+- type: job
+  id: CentralCommandMagistrate 
+  name: job-name-centcomoff
+  description: job-description-centcomoff
+  playTimeTracker: JobCentralMagistrate 
+  setPreference: false
+  startingGear: CentcomGearMagistrate 
+  icon: "JobIconNanotrasen"
+  supervisors: job-supervisors-hos
+  canBeAntag: false
+  accessGroups:
+  - AllAccess
+  access:
+  - CentralCommand
+
+- type: startingGear
+  id: CentcomGearMagistrate
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitCentcomOfficial
+    shoes: ClothingShoesBootsLaceup
+    head: ClothingHeadHatPwig
+    eyes: ClothingEyesGlassesSunglasses
+    gloves: ClothingHandsGlovesColorBlack
+    outerClothing: ClothingOuterRobesJudge
+    neck: ClothingNeckCloakCJ
+    id: CentcomPDA
+    ears: ClothingHeadsetAltCentCom
+    belt: WeaponPistolN1984
+    pocket1: BoxFolderBlack
+    pocket2: Gavel
+
