@@ -1,4 +1,4 @@
-﻿- type: job
+- type: job
   id: MedicalIntern
   name: job-name-intern
   description: job-description-intern
@@ -28,6 +28,7 @@
     shoes: ClothingShoesColorWhite
     id: MedicalInternPDA
     ears: ClothingHeadsetMedical
+    pocket1: CandyBucket
     belt: ClothingBeltMedicalFilled
     pocket2: BookMedicalReferenceBook
   # innerClothingSkirt: ClothingUniformJumpskirtColorWhite # DeltaV

@@ -52,6 +52,7 @@
     shoes: ClothingShoesColorBrown
     id: CMOPDA
     ears: ClothingHeadsetCMO
+    pocket1: CandyBucket
     belt: ClothingBeltMedicalFilled
   innerClothingSkirt: ClothingUniformJumpskirtCMO
   satchel: ClothingBackpackSatchelCMOFilled

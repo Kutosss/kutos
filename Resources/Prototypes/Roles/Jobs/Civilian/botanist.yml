@@ -22,6 +22,7 @@
     shoes: ClothingShoesColorBrown
     id: BotanistPDA
     ears: ClothingHeadsetService
+    pocket1: CandyBucket
     outerClothing: ClothingOuterApronBotanist
     belt: ClothingBeltPlantFilled
   innerClothingSkirt: ClothingUniformJumpskirtHydroponics

@@ -37,7 +37,7 @@
     back: ClothingBackpackClownFilled
     shoes: ClothingShoesClown
     mask: ClothingMaskClown
-    pocket1: BikeHorn
+    pocket1: CandyBucket
     pocket2: ClownRecorder
     id: ClownPDA
     ears: ClothingHeadsetService

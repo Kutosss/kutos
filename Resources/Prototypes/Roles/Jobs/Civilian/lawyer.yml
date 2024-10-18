@@ -26,6 +26,7 @@
     shoes: ClothingShoesBootsLaceup
     id: LawyerPDA
     ears: ClothingHeadsetSecurity
+    pocket1: CandyBucket
     # TODO add copy of space law
   inhand:
     - BriefcaseBrownFilled
