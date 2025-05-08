@@ -29,6 +29,7 @@ public sealed class BanWebhooks : BaseWebhookService
         
         // Подписываемся на события банов
         _banManager.BanAdded += OnBanAdded;
+        LogInfo("Subscribed to BanAdded event");
     }
 
     /// <summary>
@@ -45,11 +46,11 @@ public sealed class BanWebhooks : BaseWebhookService
             try
             {
                 await SendBanWebhook(ban);
-                Sawmill.Info($"Ban webhook sent for user: {ban.UserId}");
+                LogInfo($"Ban webhook sent for user: {ban.UserId}");
             }
             catch (Exception e)
             {
-                Sawmill.Error($"Error sending ban webhook: {e}");
+                LogError($"Error sending ban webhook: {e}");
             }
         });
     }
@@ -85,6 +86,9 @@ public sealed class BanWebhooks : BaseWebhookService
     {
         var sb = new StringBuilder();
         
+        // Добавляем ID бана в начало сообщения
+        sb.AppendLine($"**ID бана:** {ban.Id ?? 0}");
+        
         // Пытаемся получить имя игрока и администратора
         string playerName = "Неизвестно";
         string adminName = "Система";
@@ -115,7 +119,7 @@ public sealed class BanWebhooks : BaseWebhookService
                     }
                     catch (Exception ex)
                     {
-                        Sawmill.Error($"Ошибка при получении имени игрока из базы данных: {ex}");
+                        LogError($"Ошибка при получении имени игрока из базы данных: {ex}");
                     }
                 });
                 dbTasks.Add(playerTask);
@@ -143,7 +147,7 @@ public sealed class BanWebhooks : BaseWebhookService
                     }
                     catch (Exception ex)
                     {
-                        Sawmill.Error($"Ошибка при получении имени администратора из базы данных: {ex}");
+                        LogError($"Ошибка при получении имени администратора из базы данных: {ex}");
                     }
                 });
                 dbTasks.Add(adminTask);

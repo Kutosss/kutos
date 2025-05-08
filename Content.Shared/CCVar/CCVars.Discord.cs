@@ -69,4 +69,13 @@ public sealed partial class CCVars
     /// </summary>
     public static readonly CVarDef<string> DiscordAuthApiKey =
         CVarDef.Create("discord.auth_api_key", "", CVar.SERVERONLY | CVar.CONFIDENTIAL);
+        
+    /// <summary>
+    ///     Уровень логирования для Discord вебхуков
+    ///     0 - только ошибки
+    ///     1 - стандартная информация
+    ///     2 - подробная отладочная информация
+    /// </summary>
+    public static readonly CVarDef<int> DiscordWebhookLogLevel =
+        CVarDef.Create("discord.webhook_log_level", 1, CVar.SERVERONLY);
 }

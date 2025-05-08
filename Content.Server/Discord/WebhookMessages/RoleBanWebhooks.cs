@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Content.Server.Administration.Managers;
+using Content.Server.Database;
 using Content.Shared.Database;
 using Robust.Server.Player;
 using Robust.Shared.IoC;
@@ -18,17 +20,29 @@ public sealed class RoleBanWebhooks : BaseWebhookService
 {
     [Dependency] private readonly IBanManager _banManager = default!;
     [Dependency] private readonly IPlayerManager _playerManager = default!;
+    [Dependency] private readonly IServerDbManager _dbManager = default!;
 
     /// <inheritdoc/>
     protected override string SawmillName => "discord.roleban_webhooks";
+    
+    /// <summary>
+    /// Использует тот же конфигурационный файл, что и для обычных банов
+    /// </summary>
+    protected override string WebhookConfigPath => "config/discord_webhook.cfg";
 
     /// <inheritdoc/>
     public override void PostInject()
     {
         base.PostInject();
 
+        // Логируем, что сервис инициализируется
+        LogInfo("Initializing RoleBanWebhooks service");
+
         // Подписываемся на событие ролевых банов
         _banManager.RoleBanAdded += OnRoleBanAdded;
+        
+        // Логируем, что подписка на событие выполнена
+        LogInfo("Subscribed to RoleBanAdded event");
     }
 
     /// <summary>
@@ -36,19 +50,26 @@ public sealed class RoleBanWebhooks : BaseWebhookService
     /// </summary>
     public void OnRoleBanAdded(string targetName, string role, string adminName, string reason, DateTimeOffset banTime, DateTimeOffset? expirationTime)
     {
+        // Логируем вызов обработчика события
+        LogDebug($"OnRoleBanAdded called: target={targetName}, role={role}, admin={adminName}");
+        
         if (!Enabled || string.IsNullOrEmpty(WebhookToken))
+        {
+            LogWarning($"Webhook not enabled or token is empty. Enabled={Enabled}, TokenEmpty={string.IsNullOrEmpty(WebhookToken)}");
             return;
+        }
         
         // Используем Task.Run для асинхронной обработки без блокировки потока
         Task.Run(async () => {
             try
             {
+                LogInfo($"Sending role ban webhook for user: {targetName}, role: {role}");
                 await SendRoleBanWebhook(targetName, role, adminName, reason, banTime, expirationTime);
-                Sawmill.Info($"Role ban webhook sent for user: {targetName}, role: {role}");
+                LogInfo($"Role ban webhook sent for user: {targetName}, role: {role}");
             }
             catch (Exception e)
             {
-                Sawmill.Error($"Error sending role ban webhook: {e}");
+                LogError($"Error sending role ban webhook: {e}");
             }
         });
     }
@@ -56,9 +77,11 @@ public sealed class RoleBanWebhooks : BaseWebhookService
     private async Task SendRoleBanWebhook(string targetName, string role, string adminName, string reason, 
         DateTimeOffset banTime, DateTimeOffset? expirationTime)
     {
+        // Больше не получаем ID бана из базы данных
+        
         var embed = new WebhookEmbed
         {
-            Title = $"Джоббан: {role}",
+            Title = "Джоббан",
             Description = FormatRoleBanInfo(targetName, role, adminName, reason, banTime, expirationTime),
             Color = 0xFFA500 // Оранжевый цвет для ролевых банов
         };
@@ -71,12 +94,13 @@ public sealed class RoleBanWebhooks : BaseWebhookService
 
         await Webhook.CreateMessageWithToken(WebhookToken, payload);
     }
-
+    
     private string FormatRoleBanInfo(string targetName, string role, string adminName, string reason, 
         DateTimeOffset banTime, DateTimeOffset? expirationTime)
     {
         var sb = new StringBuilder();
         
+        // Удаляем строку с ID бана
         sb.AppendLine($"**Игрок:** {targetName}");
         sb.AppendLine($"**Роль:** {role}");
         sb.AppendLine($"**Администратор:** {adminName}");

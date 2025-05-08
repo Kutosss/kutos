@@ -1,18 +1,67 @@
+using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Content.Shared.CCVar;
+using Robust.Shared.Configuration;
+using Robust.Shared.IoC;
+using Robust.Shared.Log;
 
 namespace Content.Server.Discord;
 
 public sealed class DiscordWebhook : IPostInjectInit
 {
     [Dependency] private readonly ILogManager _log = default!;
+    [Dependency] private readonly IConfigurationManager _configManager = default!;
 
     private const string BaseUrl = "https://discord.com/api/v10/webhooks";
     private readonly HttpClient _http = new();
     private ISawmill _sawmill = default!;
+    
+    /// <summary>
+    /// Получает текущий уровень логирования из CVar
+    /// </summary>
+    private int LogLevel => _configManager.GetCVar(CCVars.DiscordWebhookLogLevel);
+    
+    /// <summary>
+    /// Логирование с учетом настроенного уровня
+    /// </summary>
+    private void LogError(string message)
+    {
+        // Ошибки логируем всегда, независимо от уровня
+        _sawmill.Error(message);
+    }
+    
+    /// <summary>
+    /// Логирование с учетом настроенного уровня
+    /// </summary>
+    private void LogWarning(string message)
+    {
+        // Предупреждения логируем всегда, независимо от уровня
+        _sawmill.Warning(message);
+    }
+    
+    /// <summary>
+    /// Логирование с учетом настроенного уровня
+    /// </summary>
+    private void LogInfo(string message)
+    {
+        // Информационные сообщения логируем только если уровень >= 1
+        if (LogLevel >= 1)
+            _sawmill.Info(message);
+    }
+    
+    /// <summary>
+    /// Логирование с учетом настроенного уровня
+    /// </summary>
+    private void LogDebug(string message)
+    {
+        // Отладочные сообщения логируем только если уровень >= 2
+        if (LogLevel >= 2)
+            _sawmill.Debug(message);
+    }
 
     private string GetUrl(WebhookIdentifier identifier)
     {
@@ -55,12 +104,12 @@ public sealed class DiscordWebhook : IPostInjectInit
                     return $"{BaseUrl}/{id}/{actualToken}";
                 }
                 
-                _sawmill.Warning($"Invalid webhook ID format: {id}. ID should be a number.");
+                LogWarning($"Invalid webhook ID format: {id}. ID should be a number.");
             }
         }
         
         // Если формат не соответствует ожидаемому, выбрасываем исключение
-        _sawmill.Error($"Webhook token format is incorrect: {token}. Expected format: ID/TOKEN or full URL.");
+        LogError($"Webhook token format is incorrect: {token}. Expected format: ID/TOKEN or full URL.");
         throw new FormatException($"Invalid webhook token format: {token}. Expected format: ID/TOKEN or full URL.");
     }
 
@@ -77,7 +126,7 @@ public sealed class DiscordWebhook : IPostInjectInit
         }
         catch
         {
-            _sawmill.Error($"Error getting discord webhook data. Stack trace:\n{Environment.StackTrace}");
+            LogError($"Error getting discord webhook data. Stack trace:\n{Environment.StackTrace}");
             return null;
         }
     }
@@ -125,7 +174,7 @@ public sealed class DiscordWebhook : IPostInjectInit
     public async Task<HttpResponseMessage> CreateMessageWithToken(string token, WebhookPayload payload)
     {
         var url = $"{GetUrlFromToken(token)}?wait=true";
-        _sawmill.Debug($"Sending webhook to URL: {url}");
+        LogDebug($"Sending webhook to URL: {url}");
         
         try 
         {
@@ -134,22 +183,22 @@ public sealed class DiscordWebhook : IPostInjectInit
             // Логируем результат
             if (response.IsSuccessStatusCode)
             {
-                _sawmill.Info($"Webhook sent successfully. Status: {response.StatusCode}");
+                LogInfo($"Webhook sent successfully. Status: {response.StatusCode}");
                 var content = await response.Content.ReadAsStringAsync();
-                _sawmill.Debug($"Response content: {content}");
+                LogDebug($"Response content: {content}");
             }
             else
             {
-                _sawmill.Error($"Failed to send webhook. Status: {response.StatusCode}");
+                LogError($"Failed to send webhook. Status: {response.StatusCode}");
                 var content = await response.Content.ReadAsStringAsync();
-                _sawmill.Error($"Error response: {content}");
+                LogError($"Error response: {content}");
             }
             
             return response;
         }
         catch (Exception ex)
         {
-            _sawmill.Error($"Exception when sending webhook: {ex}");
+            LogError($"Exception when sending webhook: {ex}");
             throw;
         }
     }
@@ -182,5 +231,6 @@ public sealed class DiscordWebhook : IPostInjectInit
     void IPostInjectInit.PostInject()
     {
         _sawmill = _log.GetSawmill("DISCORD");
+        LogDebug("Discord webhook service initialized");
     }
 }

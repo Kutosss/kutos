@@ -289,7 +289,14 @@ public sealed partial class BanManager : IBanManager, IPostInjectInit
         if (role.StartsWith(JobPrefix, StringComparison.Ordinal))
             roleName = role[JobPrefix.Length..];
             
+        _sawmill.Info($"[RoleBanAdded] Вызов события RoleBanAdded: target={targetName}, role={roleName}, admin={adminName}");
+        
+        var handlers = RoleBanAdded?.GetInvocationList().Length ?? 0;
+        _sawmill.Info($"[RoleBanAdded] Количество обработчиков события: {handlers}");
+        
         RoleBanAdded?.Invoke(targetName, roleName, adminName, reason, timeOfBan, expires);
+        
+        _sawmill.Info($"[RoleBanAdded] Событие RoleBanAdded вызвано");
 
         if (target != null && _playerManager.TryGetSessionById(target.Value, out var session))
         {

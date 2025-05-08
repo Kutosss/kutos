@@ -2,7 +2,9 @@ using System;
 using System.IO;
 using Robust.Shared.IoC;
 using Robust.Shared.Log;
+using Robust.Shared.Configuration;
 using Content.Server.Discord;
+using Content.Shared.CCVar;
 
 namespace Content.Server.Discord.WebhookMessages;
 
@@ -14,6 +16,7 @@ public abstract class BaseWebhookService : IPostInjectInit
 {
     [Dependency] protected readonly DiscordWebhook Webhook = default!;
     [Dependency] private readonly ILogManager _logManager = default!;
+    [Dependency] private readonly IConfigurationManager _configManager = default!;
     
     protected string WebhookToken = string.Empty;
     protected bool Enabled;
@@ -29,6 +32,11 @@ public abstract class BaseWebhookService : IPostInjectInit
     /// </summary>
     protected abstract string SawmillName { get; }
     
+    /// <summary>
+    /// Получает текущий уровень логирования из CVar
+    /// </summary>
+    protected int LogLevel => _configManager.GetCVar(CCVars.DiscordWebhookLogLevel);
+    
     public virtual void PostInject()
     {
         Sawmill = _logManager.GetSawmill(SawmillName);
@@ -38,16 +46,54 @@ public abstract class BaseWebhookService : IPostInjectInit
         
         if (string.IsNullOrEmpty(WebhookToken))
         {
-            Sawmill.Warning("Discord webhook token is not set. Notifications will not be sent.");
+            LogWarning("Discord webhook token is not set. Notifications will not be sent.");
             Enabled = false;
         }
         else
         {
             Enabled = true;
-            Sawmill.Info("Discord webhook initialized successfully");
+            LogInfo("Discord webhook initialized successfully");
         }
         
         // Подписки на события должны быть реализованы в производных классах
+    }
+    
+    /// <summary>
+    /// Логирование с учетом настроенного уровня
+    /// </summary>
+    protected void LogError(string message)
+    {
+        // Ошибки логируем всегда, независимо от уровня
+        Sawmill.Error(message);
+    }
+    
+    /// <summary>
+    /// Логирование с учетом настроенного уровня
+    /// </summary>
+    protected void LogWarning(string message)
+    {
+        // Предупреждения логируем всегда, независимо от уровня
+        Sawmill.Warning(message);
+    }
+    
+    /// <summary>
+    /// Логирование с учетом настроенного уровня
+    /// </summary>
+    protected void LogInfo(string message)
+    {
+        // Информационные сообщения логируем только если уровень >= 1
+        if (LogLevel >= 1)
+            Sawmill.Info(message);
+    }
+    
+    /// <summary>
+    /// Логирование с учетом настроенного уровня
+    /// </summary>
+    protected void LogDebug(string message)
+    {
+        // Отладочные сообщения логируем только если уровень >= 2
+        if (LogLevel >= 2)
+            Sawmill.Debug(message);
     }
     
     /// <summary>
@@ -70,7 +116,7 @@ public abstract class BaseWebhookService : IPostInjectInit
                     "# Example: https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN\n" +
                     "webhook_url=");
                 
-                Sawmill.Warning($"Discord webhook config file created at {WebhookConfigPath}. Please edit it with your actual webhook URL.");
+                LogWarning($"Discord webhook config file created at {WebhookConfigPath}. Please edit it with your actual webhook URL.");
                 return;
             }
 
@@ -86,16 +132,16 @@ public abstract class BaseWebhookService : IPostInjectInit
                 if (line.StartsWith("webhook_url="))
                 {
                     WebhookToken = line.Substring("webhook_url=".Length).Trim();
-                    Sawmill.Debug("Discord webhook URL loaded from config file");
+                    LogDebug("Discord webhook URL loaded from config file");
                     return;
                 }
             }
             
-            Sawmill.Warning($"No webhook_url found in {WebhookConfigPath}");
+            LogWarning($"No webhook_url found in {WebhookConfigPath}");
         }
         catch (Exception ex)
         {
-            Sawmill.Error($"Error loading Discord webhook configuration: {ex}");
+            LogError($"Error loading Discord webhook configuration: {ex}");
         }
     }
 } 

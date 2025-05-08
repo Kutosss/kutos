@@ -67,8 +67,7 @@ namespace Content.Server.IoC
             IoCManager.Register<UserDbDataManager>();
             IoCManager.Register<ServerInfoManager>();
             IoCManager.Register<PoissonDiskSampler>();
-            IoCManager.Register<DiscordWebhook>();
-            IoCManager.Register<BanWebhooks>();
+            Discord.DiscordWebhookRegistration.Register(IoCManager.Resolve<IDependencyCollection>());
             IoCManager.Register<ServerDbEntryManager>();
             IoCManager.Register<JoinQueueManager>();
             IoCManager.Register<DiscordAuthManager>();
