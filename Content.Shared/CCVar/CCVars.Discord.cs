@@ -5,6 +5,12 @@ namespace Content.Shared.CCVar;
 public sealed partial class CCVars
 {
     /// <summary>
+    /// Глобальный выключатель для всех Discord вебхуков
+    /// </summary>
+    public static readonly CVarDef<bool> DiscordWebhookEnabled =
+        CVarDef.Create("discord.webhook_enabled", true, CVar.SERVERONLY);
+
+    /// <summary>
     /// The role that will get mentioned if a new SOS ahelp comes in.
     /// </summary>
     public static readonly CVarDef<string> DiscordAhelpMention =

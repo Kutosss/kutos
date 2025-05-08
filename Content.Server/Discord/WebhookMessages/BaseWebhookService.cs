@@ -37,9 +37,22 @@ public abstract class BaseWebhookService : IPostInjectInit
     /// </summary>
     protected int LogLevel => _configManager.GetCVar(CCVars.DiscordWebhookLogLevel);
     
+    /// <summary>
+    /// Проверяет, включены ли вебхуки глобально
+    /// </summary>
+    protected bool WebhooksEnabled => _configManager.GetCVar(CCVars.DiscordWebhookEnabled);
+    
     public virtual void PostInject()
     {
         Sawmill = _logManager.GetSawmill(SawmillName);
+        
+        // Проверяем глобальное состояние вебхуков
+        if (!WebhooksEnabled)
+        {
+            LogInfo("Discord webhooks are globally disabled");
+            Enabled = false;
+            return;
+        }
         
         // Загружаем токен вебхука
         LoadWebhookToken();
