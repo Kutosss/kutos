@@ -18,6 +18,45 @@ public sealed class DiscordWebhook : IPostInjectInit
     {
         return $"{BaseUrl}/{identifier.Id}/{identifier.Token}";
     }
+    
+    /// <summary>
+    ///     Создает URL для вебхука, используя только токен.
+    /// </summary>
+    /// <param name="token">Токен вебхука</param>
+    /// <returns>URL для вебхука</returns>
+    private string GetUrlFromToken(string token)
+    {
+        // Важно! Токен, который мы получили, скорее всего уже включает в себя ID и токен
+        // Обычно токен для вебхука Discord выглядит так:
+        // https://discord.com/api/webhooks/1234567890123456789/abcdefghijklmnopqrstuvwxyz
+        // Где:
+        // 1234567890123456789 - ID вебхука
+        // abcdefghijklmnopqrstuvwxyz - токен вебхука
+        
+        // Проверяем, содержит ли токен URL с ID
+        if (token.Contains("/api/webhooks/"))
+        {
+            // Просто используем URL как есть, если это полный URL
+            return token;
+        }
+        
+        // Проверяем, содержит ли токен разделитель ID/token
+        if (token.Contains('/'))
+        {
+            var parts = token.Split('/');
+            if (parts.Length >= 2)
+            {
+                var id = parts[^2];
+                var actualToken = parts[^1];
+                return $"{BaseUrl}/{id}/{actualToken}";
+            }
+        }
+        
+        // Иначе просто пробуем использовать как есть
+        // Это не должно работать для Discord, но оставим для обратной совместимости
+        _sawmill.Warning($"Webhook token format may be incorrect: {token}. Expected format: ID/TOKEN");
+        return $"{BaseUrl}/0/{token}";
+    }
 
     /// <summary>
     ///     Gets the webhook data from the given webhook url.
@@ -69,6 +108,44 @@ public sealed class DiscordWebhook : IPostInjectInit
     {
         var url = $"{GetUrl(identifier)}?wait=true";
         return await _http.PostAsJsonAsync(url, payload, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
+    }
+    
+    /// <summary>
+    ///     Creates a new webhook message using only the token and payload.
+    /// </summary>
+    /// <param name="token">Токен вебхука</param>
+    /// <param name="payload">The payload to create the message from.</param>
+    /// <returns>The response from Discord's API.</returns>
+    public async Task<HttpResponseMessage> CreateMessageWithToken(string token, WebhookPayload payload)
+    {
+        var url = $"{GetUrlFromToken(token)}?wait=true";
+        _sawmill.Debug($"Sending webhook to URL: {url}");
+        
+        try 
+        {
+            var response = await _http.PostAsJsonAsync(url, payload, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
+            
+            // Логируем результат
+            if (response.IsSuccessStatusCode)
+            {
+                _sawmill.Info($"Webhook sent successfully. Status: {response.StatusCode}");
+                var content = await response.Content.ReadAsStringAsync();
+                _sawmill.Debug($"Response content: {content}");
+            }
+            else
+            {
+                _sawmill.Error($"Failed to send webhook. Status: {response.StatusCode}");
+                var content = await response.Content.ReadAsStringAsync();
+                _sawmill.Error($"Error response: {content}");
+            }
+            
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _sawmill.Error($"Exception when sending webhook: {ex}");
+            throw;
+        }
     }
 
     /// <summary>

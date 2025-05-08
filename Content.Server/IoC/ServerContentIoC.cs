@@ -9,6 +9,7 @@ using Content.Server.Connection;
 using Content.Server.JoinQueue;
 using Content.Server.Database;
 using Content.Server.Discord;
+using Content.Server.Discord.WebhookMessages;
 using Content.Server.DiscordAuth;
 using Content.Server.EUI;
 using Content.Server.GhostKick;
@@ -67,6 +68,7 @@ namespace Content.Server.IoC
             IoCManager.Register<ServerInfoManager>();
             IoCManager.Register<PoissonDiskSampler>();
             IoCManager.Register<DiscordWebhook>();
+            IoCManager.Register<BanWebhooks>();
             IoCManager.Register<ServerDbEntryManager>();
             IoCManager.Register<JoinQueueManager>();
             IoCManager.Register<DiscordAuthManager>();
