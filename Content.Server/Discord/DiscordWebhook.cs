@@ -48,14 +48,20 @@ public sealed class DiscordWebhook : IPostInjectInit
             {
                 var id = parts[^2];
                 var actualToken = parts[^1];
-                return $"{BaseUrl}/{id}/{actualToken}";
+                
+                // Проверяем, что ID является числовым значением
+                if (ulong.TryParse(id, out _))
+                {
+                    return $"{BaseUrl}/{id}/{actualToken}";
+                }
+                
+                _sawmill.Warning($"Invalid webhook ID format: {id}. ID should be a number.");
             }
         }
         
-        // Иначе просто пробуем использовать как есть
-        // Это не должно работать для Discord, но оставим для обратной совместимости
-        _sawmill.Warning($"Webhook token format may be incorrect: {token}. Expected format: ID/TOKEN");
-        return $"{BaseUrl}/0/{token}";
+        // Если формат не соответствует ожидаемому, выбрасываем исключение
+        _sawmill.Error($"Webhook token format is incorrect: {token}. Expected format: ID/TOKEN or full URL.");
+        throw new FormatException($"Invalid webhook token format: {token}. Expected format: ID/TOKEN or full URL.");
     }
 
     /// <summary>

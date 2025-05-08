@@ -14,100 +14,43 @@ namespace Content.Server.Discord.WebhookMessages;
 /// Отправляет уведомления о ролевых банах через Discord вебхуки.
 /// Использует тот же файл конфигурации, что и BanWebhooks.
 /// </summary>
-public sealed class RoleBanWebhooks : IPostInjectInit
+public sealed class RoleBanWebhooks : BaseWebhookService
 {
-    [Dependency] private readonly DiscordWebhook _webhook = default!;
     [Dependency] private readonly IBanManager _banManager = default!;
-    [Dependency] private readonly ILogManager _logManager = default!;
     [Dependency] private readonly IPlayerManager _playerManager = default!;
 
-    private ISawmill _sawmill = default!;
-    private string _webhookToken = string.Empty;
-    private bool _enabled;
-    
-    // Путь к конфигурационному файлу с токеном вебхука (тот же, что используется для обычных банов)
-    private const string WebhookConfigPath = "config/discord_webhook.cfg";
+    /// <inheritdoc/>
+    protected override string SawmillName => "discord.roleban_webhooks";
 
-    void IPostInjectInit.PostInject()
+    /// <inheritdoc/>
+    public override void PostInject()
     {
-        _sawmill = _logManager.GetSawmill("discord.roleban_webhooks");
-        
-        // Загружаем токен из конфигурационного файла
-        LoadWebhookToken();
-        
-        // Проверяем, что токен загружен
-        if (string.IsNullOrEmpty(_webhookToken))
-        {
-            _sawmill.Warning("Discord webhook token is not set. Role ban notifications will not be sent.");
-            _enabled = false;
-        }
-        else
-        {
-            _enabled = true;
-            _sawmill.Info("Role ban Discord webhook initialized successfully");
-        }
+        base.PostInject();
 
         // Подписываемся на событие ролевых банов
         _banManager.RoleBanAdded += OnRoleBanAdded;
     }
 
     /// <summary>
-    /// Загружает токен вебхука из конфигурационного файла.
+    /// Обработчик события добавления нового ролевого бана.
     /// </summary>
-    private void LoadWebhookToken()
+    public void OnRoleBanAdded(string targetName, string role, string adminName, string reason, DateTimeOffset banTime, DateTimeOffset? expirationTime)
     {
-        try
-        {
-            // Проверяем, существует ли файл конфигурации
-            if (!System.IO.File.Exists(WebhookConfigPath))
-            {
-                _sawmill.Warning($"Discord webhook config file not found at {WebhookConfigPath}.");
-                return;
-            }
-
-            // Читаем файл конфигурации
-            var lines = System.IO.File.ReadAllLines(WebhookConfigPath);
-            foreach (var line in lines)
-            {
-                // Пропускаем комментарии и пустые строки
-                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
-                    continue;
-                
-                // Ищем строку с токеном
-                if (line.StartsWith("webhook_url="))
-                {
-                    _webhookToken = line.Substring("webhook_url=".Length).Trim();
-                    _sawmill.Debug("Discord webhook URL loaded from config file");
-                    return;
-                }
-            }
-            
-            _sawmill.Warning($"No webhook_url found in {WebhookConfigPath}");
-        }
-        catch (Exception ex)
-        {
-            _sawmill.Error($"Error loading Discord webhook configuration: {ex}");
-        }
-    }
-
-    /// <summary>
-    /// Метод для отправки уведомления о новом ролевом бане.
-    /// Должен вызываться из BanManager при добавлении ролевого бана.
-    /// </summary>
-    public async void OnRoleBanAdded(string targetName, string role, string adminName, string reason, DateTimeOffset banTime, DateTimeOffset? expirationTime)
-    {
-        if (!_enabled || string.IsNullOrEmpty(_webhookToken))
+        if (!Enabled || string.IsNullOrEmpty(WebhookToken))
             return;
         
-        try
-        {
-            await SendRoleBanWebhook(targetName, role, adminName, reason, banTime, expirationTime);
-            _sawmill.Info($"Role ban webhook sent for user: {targetName}, role: {role}");
-        }
-        catch (Exception e)
-        {
-            _sawmill.Error($"Error sending role ban webhook: {e}");
-        }
+        // Используем Task.Run для асинхронной обработки без блокировки потока
+        Task.Run(async () => {
+            try
+            {
+                await SendRoleBanWebhook(targetName, role, adminName, reason, banTime, expirationTime);
+                Sawmill.Info($"Role ban webhook sent for user: {targetName}, role: {role}");
+            }
+            catch (Exception e)
+            {
+                Sawmill.Error($"Error sending role ban webhook: {e}");
+            }
+        });
     }
     
     private async Task SendRoleBanWebhook(string targetName, string role, string adminName, string reason, 
@@ -126,7 +69,7 @@ public sealed class RoleBanWebhooks : IPostInjectInit
             Embeds = new List<WebhookEmbed> { embed }
         };
 
-        await _webhook.CreateMessageWithToken(_webhookToken, payload);
+        await Webhook.CreateMessageWithToken(WebhookToken, payload);
     }
 
     private string FormatRoleBanInfo(string targetName, string role, string adminName, string reason, 
