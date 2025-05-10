@@ -18,9 +18,13 @@ public sealed class BanWebhooks : BaseWebhookService
     [Dependency] private readonly IBanManager _banManager = default!;
     [Dependency] private readonly IPlayerManager _playerManager = default!;
     [Dependency] private readonly IServerDbManager _dbManager = default!;
+    [Dependency] private readonly IConfigManager _configManager = default!;
 
     /// <inheritdoc/>
     protected override string SawmillName => "discord.ban_webhooks";
+
+    /// <inheritdoc/>
+    protected override string WebhookToken => _configManager.GetCVar(Content.Shared.CCVar.CCVars.DiscordBanWebhookUrl);
 
     /// <inheritdoc/>
     public override void PostInject()

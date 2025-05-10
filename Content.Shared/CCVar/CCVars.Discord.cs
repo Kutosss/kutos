@@ -84,4 +84,10 @@ public sealed partial class CCVars
     /// </summary>
     public static readonly CVarDef<int> DiscordWebhookLogLevel =
         CVarDef.Create("discord.webhook_log_level", 1, CVar.SERVERONLY);
+
+    /// <summary>
+    /// URL Discord вебхука для уведомлений о банах (server bans)
+    /// </summary>
+    public static readonly CVarDef<string> DiscordBanWebhookUrl =
+        CVarDef.Create("discord.ban_webhook_url", string.Empty, CVar.SERVERONLY | CVar.CONFIDENTIAL);
 }

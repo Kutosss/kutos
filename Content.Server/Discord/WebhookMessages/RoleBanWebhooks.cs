@@ -9,6 +9,7 @@ using Content.Shared.Database;
 using Robust.Server.Player;
 using Robust.Shared.IoC;
 using Robust.Shared.Log;
+using Content.Server.Configuration;
 
 namespace Content.Server.Discord.WebhookMessages;
 
@@ -21,14 +22,13 @@ public sealed class RoleBanWebhooks : BaseWebhookService
     [Dependency] private readonly IBanManager _banManager = default!;
     [Dependency] private readonly IPlayerManager _playerManager = default!;
     [Dependency] private readonly IServerDbManager _dbManager = default!;
+    [Dependency] private readonly IConfigManager _configManager = default!;
 
     /// <inheritdoc/>
     protected override string SawmillName => "discord.roleban_webhooks";
     
-    /// <summary>
-    /// Использует тот же конфигурационный файл, что и для обычных банов
-    /// </summary>
-    protected override string WebhookConfigPath => "config/discord_webhook.cfg";
+    /// <inheritdoc/>
+    protected override string WebhookToken => _configManager.GetCVar(Content.Shared.CCVar.CCVars.DiscordBanWebhookUrl);
 
     /// <inheritdoc/>
     public override void PostInject()

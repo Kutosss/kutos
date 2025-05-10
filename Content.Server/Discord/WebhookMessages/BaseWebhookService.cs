@@ -18,14 +18,8 @@ public abstract class BaseWebhookService : IPostInjectInit
     [Dependency] private readonly ILogManager _logManager = default!;
     [Dependency] private readonly IConfigurationManager _configManager = default!;
     
-    protected string WebhookToken = string.Empty;
     protected bool Enabled;
     protected ISawmill Sawmill = default!;
-    
-    /// <summary>
-    /// Путь к конфигурационному файлу с токеном вебхука
-    /// </summary>
-    protected virtual string WebhookConfigPath => "config/discord_webhook.cfg";
     
     /// <summary>
     /// Имя для логгера (sawmill)
@@ -41,7 +35,12 @@ public abstract class BaseWebhookService : IPostInjectInit
     /// Проверяет, включены ли вебхуки глобально
     /// </summary>
     protected bool WebhooksEnabled => _configManager.GetCVar(CCVars.DiscordWebhookEnabled);
-    
+
+    /// <summary>
+    /// Получает токен вебхука (URL) для отправки сообщений. Должен быть реализован в наследниках.
+    /// </summary>
+    protected abstract string WebhookToken { get; }
+
     public virtual void PostInject()
     {
         Sawmill = _logManager.GetSawmill(SawmillName);
@@ -54,9 +53,6 @@ public abstract class BaseWebhookService : IPostInjectInit
             return;
         }
         
-        // Загружаем токен вебхука
-        LoadWebhookToken();
-        
         if (string.IsNullOrEmpty(WebhookToken))
         {
             LogWarning("Discord webhook token is not set. Notifications will not be sent.");
@@ -67,7 +63,6 @@ public abstract class BaseWebhookService : IPostInjectInit
             Enabled = true;
             LogInfo("Discord webhook initialized successfully");
         }
-        
         // Подписки на события должны быть реализованы в производных классах
     }
     
@@ -107,54 +102,5 @@ public abstract class BaseWebhookService : IPostInjectInit
         // Отладочные сообщения логируем только если уровень >= 2
         if (LogLevel >= 2)
             Sawmill.Debug(message);
-    }
-    
-    /// <summary>
-    /// Загружает токен вебхука из конфигурационного файла.
-    /// </summary>
-    protected virtual void LoadWebhookToken()
-    {
-        try
-        {
-            // Проверяем, существует ли файл конфигурации
-            if (!File.Exists(WebhookConfigPath))
-            {
-                // Создаем директорию, если не существует
-                Directory.CreateDirectory(Path.GetDirectoryName(WebhookConfigPath) ?? "config");
-                
-                // Создаем пример файла конфигурации
-                File.WriteAllText(WebhookConfigPath, 
-                    "# Discord webhook URL for notifications\n" +
-                    "# Replace with your actual webhook URL\n" +
-                    "# Example: https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN\n" +
-                    "webhook_url=");
-                
-                LogWarning($"Discord webhook config file created at {WebhookConfigPath}. Please edit it with your actual webhook URL.");
-                return;
-            }
-
-            // Читаем файл конфигурации
-            var lines = File.ReadAllLines(WebhookConfigPath);
-            foreach (var line in lines)
-            {
-                // Пропускаем комментарии и пустые строки
-                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
-                    continue;
-                
-                // Ищем строку с токеном
-                if (line.StartsWith("webhook_url="))
-                {
-                    WebhookToken = line.Substring("webhook_url=".Length).Trim();
-                    LogDebug("Discord webhook URL loaded from config file");
-                    return;
-                }
-            }
-            
-            LogWarning($"No webhook_url found in {WebhookConfigPath}");
-        }
-        catch (Exception ex)
-        {
-            LogError($"Error loading Discord webhook configuration: {ex}");
-        }
     }
 } 
