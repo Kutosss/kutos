@@ -310,5 +310,3 @@ Resources/MapImages
 # Changelog package lock
 package-lock.json
 
-# Конфигурационные файлы Discord webhook
-config/discord_webhook.cfg
