@@ -25,4 +25,13 @@ public sealed partial class CCVars : CVars
     /// </summary>
     public static readonly CVarDef<bool> DebugPow3rDisableParallel =
         CVarDef.Create("debug.pow3r_disable_parallel", true, CVar.SERVERONLY);
+
+    /// <summary>
+    /// Discord webhook settings
+    /// </summary>
+    public static class Discord
+    {
+        public static readonly CVarDef<bool> WebhookEnabled = CVarDef.Create("discord.webhook_enabled", true, CVar.ARCHIVE);
+        public static readonly CVarDef<string> BanWebhookUrl = CVarDef.Create("discord.ban_webhook_url", "", CVar.ARCHIVE);
+    }
 }
