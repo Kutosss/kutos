@@ -152,26 +152,29 @@ namespace Content.Server.Database
             return await query.ToListAsync();
         }
 
-        public override async Task AddServerBanAsync(ServerBanDef serverBan)
+        public override async Task<ServerBanDef> AddServerBanAsync(ServerBanDef serverBan)
         {
             await using var db = await GetDbImpl();
 
-            db.SqliteDbContext.Ban.Add(new ServerBan
+            var ban = new ServerBan
             {
                 Address = serverBan.Address.ToNpgsqlInet(),
+                HWId = serverBan.HWId,
                 Reason = serverBan.Reason,
                 Severity = serverBan.Severity,
                 BanningAdmin = serverBan.BanningAdmin?.UserId,
-                HWId = serverBan.HWId,
                 BanTime = serverBan.BanTime.UtcDateTime,
                 ExpirationTime = serverBan.ExpirationTime?.UtcDateTime,
                 RoundId = serverBan.RoundId,
                 PlaytimeAtNote = serverBan.PlaytimeAtNote,
                 PlayerUserId = serverBan.UserId?.UserId,
                 ExemptFlags = serverBan.ExemptFlags
-            });
+            };
 
+            db.SqliteDbContext.Ban.Add(ban);
             await db.SqliteDbContext.SaveChangesAsync();
+
+            return ConvertBan(ban)!;
         }
 
         public override async Task AddServerUnbanAsync(ServerUnbanDef serverUnban)
@@ -537,6 +540,34 @@ namespace Content.Server.Database
         {
             DebugTools.Assert(time.Kind == DateTimeKind.Unspecified);
             return DateTime.SpecifyKind(time, DateTimeKind.Utc);
+        }
+
+        public override async Task<List<ServerRoleBanDef>> GetRecentRoleBansAsync(string role, string targetName, DateTimeOffset banTime)
+        {
+            await using var db = await GetDbImpl();
+
+            var query = db.SqliteDbContext.RoleBan
+                .Include(p => p.Unban)
+                .Where(p => p.RoleId == role && 
+                           p.PlayerUserId.ToString() == targetName && 
+                           p.BanTime >= banTime.AddMinutes(-1) && 
+                           p.BanTime <= banTime.AddMinutes(1))
+                .OrderByDescending(b => b.BanTime);
+
+            var queryRoleBans = await query.ToArrayAsync();
+            var bans = new List<ServerRoleBanDef>(queryRoleBans.Length);
+
+            foreach (var ban in queryRoleBans)
+            {
+                var banDef = ConvertRoleBan(ban);
+
+                if (banDef != null)
+                {
+                    bans.Add(banDef);
+                }
+            }
+
+            return bans;
         }
 
         private async Task<DbGuardImpl> GetDbImpl(

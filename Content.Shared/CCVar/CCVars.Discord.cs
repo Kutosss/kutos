@@ -5,6 +5,12 @@ namespace Content.Shared.CCVar;
 public sealed partial class CCVars
 {
     /// <summary>
+    /// Глобальный выключатель для всех Discord вебхуков
+    /// </summary>
+    public static readonly CVarDef<bool> DiscordWebhookEnabled =
+        CVarDef.Create("discord.webhook_enabled", true, CVar.SERVERONLY);
+
+    /// <summary>
     /// The role that will get mentioned if a new SOS ahelp comes in.
     /// </summary>
     public static readonly CVarDef<string> DiscordAhelpMention =
@@ -69,4 +75,19 @@ public sealed partial class CCVars
     /// </summary>
     public static readonly CVarDef<string> DiscordAuthApiKey =
         CVarDef.Create("discord.auth_api_key", "", CVar.SERVERONLY | CVar.CONFIDENTIAL);
+        
+    /// <summary>
+    ///     Уровень логирования для Discord вебхуков
+    ///     0 - только ошибки
+    ///     1 - стандартная информация
+    ///     2 - подробная отладочная информация
+    /// </summary>
+    public static readonly CVarDef<int> DiscordWebhookLogLevel =
+        CVarDef.Create("discord.webhook_log_level", 1, CVar.SERVERONLY);
+
+    /// <summary>
+    /// URL Discord вебхука для уведомлений о банах (server bans)
+    /// </summary>
+    public static readonly CVarDef<string> DiscordBanWebhookUrl =
+        CVarDef.Create("discord.ban_webhook_url", string.Empty, CVar.SERVERONLY | CVar.CONFIDENTIAL);
 }
