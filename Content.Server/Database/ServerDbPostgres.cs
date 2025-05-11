@@ -276,11 +276,11 @@ namespace Content.Server.Database
                 unban.UnbanTime);
         }
 
-        public override async Task<ServerBanDef> AddServerBanAsync(ServerBanDef serverBan)
+        public override async Task AddServerBanAsync(ServerBanDef serverBan)
         {
             await using var db = await GetDbImpl();
 
-            var ban = new ServerBan
+            db.PgDbContext.Ban.Add(new ServerBan
             {
                 Address = serverBan.Address.ToNpgsqlInet(),
                 HWId = serverBan.HWId,
@@ -293,12 +293,9 @@ namespace Content.Server.Database
                 PlaytimeAtNote = serverBan.PlaytimeAtNote,
                 PlayerUserId = serverBan.UserId?.UserId,
                 ExemptFlags = serverBan.ExemptFlags
-            };
+            });
 
-            db.PgDbContext.Ban.Add(ban);
             await db.PgDbContext.SaveChangesAsync();
-
-            return ConvertBan(ban)!;
         }
 
         public override async Task AddServerUnbanAsync(ServerUnbanDef serverUnban)
@@ -589,34 +586,6 @@ WHERE to_tsvector('english'::regconfig, a.message) @@ websearch_to_tsquery('engl
             [CallerMemberName] string? name = null)
         {
             return await GetDbImpl(cancel, name);
-        }
-
-        public override async Task<List<ServerRoleBanDef>> GetRecentRoleBansAsync(string role, string targetName, DateTimeOffset banTime)
-        {
-            await using var db = await GetDbImpl();
-
-            var query = db.PgDbContext.RoleBan
-                .Include(p => p.Unban)
-                .Where(p => p.RoleId == role && 
-                           p.PlayerUserId.ToString() == targetName && 
-                           p.BanTime >= banTime.AddMinutes(-1) && 
-                           p.BanTime <= banTime.AddMinutes(1))
-                .OrderByDescending(b => b.BanTime);
-
-            var queryRoleBans = await query.ToArrayAsync();
-            var bans = new List<ServerRoleBanDef>(queryRoleBans.Length);
-
-            foreach (var ban in queryRoleBans)
-            {
-                var banDef = ConvertRoleBan(ban);
-
-                if (banDef != null)
-                {
-                    bans.Add(banDef);
-                }
-            }
-
-            return bans;
         }
 
         private sealed class DbGuardImpl : DbGuard

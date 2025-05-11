@@ -75,12 +75,17 @@ public sealed class DiscordWebhook : IPostInjectInit
     /// <returns>URL для вебхука</returns>
     private string GetUrlFromToken(string token)
     {
-        LogDebug($"Processing token: {token}");
+        // Важно! Токен, который мы получили, скорее всего уже включает в себя ID и токен
+        // Обычно токен для вебхука Discord выглядит так:
+        // https://discord.com/api/webhooks/1234567890123456789/abcdefghijklmnopqrstuvwxyz
+        // Где:
+        // 1234567890123456789 - ID вебхука
+        // abcdefghijklmnopqrstuvwxyz - токен вебхука
         
         // Проверяем, содержит ли токен URL с ID
         if (token.Contains("/api/webhooks/"))
         {
-            LogDebug("Token contains full URL, using as is");
+            // Просто используем URL как есть, если это полный URL
             return token;
         }
         
@@ -93,14 +98,10 @@ public sealed class DiscordWebhook : IPostInjectInit
                 var id = parts[^2];
                 var actualToken = parts[^1];
                 
-                LogDebug($"Split token into ID: {id} and token: {actualToken}");
-                
                 // Проверяем, что ID является числовым значением
                 if (ulong.TryParse(id, out _))
                 {
-                    var url = $"{BaseUrl}/{id}/{actualToken}";
-                    LogDebug($"Generated URL: {url}");
-                    return url;
+                    return $"{BaseUrl}/{id}/{actualToken}";
                 }
                 
                 LogWarning($"Invalid webhook ID format: {id}. ID should be a number.");
@@ -172,21 +173,14 @@ public sealed class DiscordWebhook : IPostInjectInit
     /// <returns>The response from Discord's API.</returns>
     public async Task<HttpResponseMessage> CreateMessageWithToken(string token, WebhookPayload payload)
     {
-        if (string.IsNullOrEmpty(token))
-        {
-            LogError("Webhook token is null or empty");
-            throw new ArgumentException("Webhook token cannot be null or empty", nameof(token));
-        }
-
-        LogDebug($"Creating webhook message with token: {token}");
         var url = $"{GetUrlFromToken(token)}?wait=true";
         LogDebug($"Sending webhook to URL: {url}");
-        LogDebug($"Payload: {JsonSerializer.Serialize(payload)}");
         
         try 
         {
             var response = await _http.PostAsJsonAsync(url, payload, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
             
+            // Логируем результат
             if (response.IsSuccessStatusCode)
             {
                 LogInfo($"Webhook sent successfully. Status: {response.StatusCode}");
@@ -204,7 +198,7 @@ public sealed class DiscordWebhook : IPostInjectInit
         }
         catch (Exception ex)
         {
-            LogError($"Exception while sending webhook: {ex}");
+            LogError($"Exception when sending webhook: {ex}");
             throw;
         }
     }

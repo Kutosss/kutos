@@ -10,16 +10,28 @@ namespace Content.Server.Discord.WebhookMessages;
 
 /// <summary>
 /// Базовый класс для сервисов отправки сообщений через Discord вебхуки.
-/// Реализует общую логику загрузки настроек и обработки токенов.
+/// Реализует общую логику и обработки логов.
 /// </summary>
+/// <remarks>
+/// Для настройки Discord вебхука необходимо добавить URL в server_config.toml:
+/// 
+/// [discord]
+/// webhook_url = "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN"
+/// webhook_enabled = true
+/// webhook_log_level = 1
+/// 
+/// Или использовать команды в консоли сервера:
+/// setcvar discord.webhook_url "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN"
+/// setcvar discord.webhook_enabled true
+/// setcvar discord.webhook_log_level 1
+/// </remarks>
 public abstract class BaseWebhookService : IPostInjectInit
 {
     [Dependency] protected readonly DiscordWebhook Webhook = default!;
-    [Dependency] protected readonly ILogManager LogManager = default!;
-    [Dependency] protected readonly IConfigurationManager ConfigManager = default!;
+    [Dependency] private readonly ILogManager _logManager = default!;
+    [Dependency] private readonly IConfigurationManager _configManager = default!;
     
     protected ISawmill Sawmill = default!;
-    protected bool Enabled => ConfigManager.GetCVar(CCVars.Discord.WebhookEnabled);
     
     /// <summary>
     /// Имя для логгера (sawmill)
@@ -27,48 +39,66 @@ public abstract class BaseWebhookService : IPostInjectInit
     protected abstract string SawmillName { get; }
     
     /// <summary>
-    /// Получает токен вебхука (URL) для отправки сообщений. Должен быть реализован в наследниках.
+    /// Получает текущий уровень логирования из CVar
     /// </summary>
-    protected abstract string WebhookToken { get; }
-
+    protected int LogLevel => _configManager.GetCVar(CCVars.DiscordWebhookLogLevel);
+    
+    /// <summary>
+    /// Проверяет, включены ли вебхуки глобально
+    /// </summary>
+    protected bool WebhooksEnabled => _configManager.GetCVar(CCVars.DiscordWebhookEnabled);
+    
     public virtual void PostInject()
     {
-        Sawmill = LogManager.GetSawmill(SawmillName);
+        Sawmill = _logManager.GetSawmill(SawmillName);
         
-        if (!Enabled)
+        // Проверяем глобальное состояние вебхуков
+        if (!WebhooksEnabled)
         {
-            Log(LogLevel.Warning, "Webhook service is disabled");
+            LogInfo("Discord webhooks are globally disabled");
             return;
         }
         
-        if (string.IsNullOrEmpty(WebhookToken))
-        {
-            Log(LogLevel.Warning, "Webhook token is not set");
-            return;
-        }
+        LogInfo("Discord webhook service initialized");
         
-        Log(LogLevel.Info, "Webhook service initialized");
+        // Подписки на события должны быть реализованы в производных классах
     }
     
     /// <summary>
-    /// Логирование с указанным уровнем
+    /// Логирование с учетом настроенного уровня
     /// </summary>
-    protected void Log(LogLevel level, string message)
+    protected void LogError(string message)
     {
-        switch (level)
-        {
-            case LogLevel.Error:
-                Sawmill.Error(message);
-                break;
-            case LogLevel.Warning:
-                Sawmill.Warning(message);
-                break;
-            case LogLevel.Info:
-                Sawmill.Info(message);
-                break;
-            case LogLevel.Debug:
-                Sawmill.Debug(message);
-                break;
-        }
+        // Ошибки логируем всегда, независимо от уровня
+        Sawmill.Error(message);
+    }
+    
+    /// <summary>
+    /// Логирование с учетом настроенного уровня
+    /// </summary>
+    protected void LogWarning(string message)
+    {
+        // Предупреждения логируем всегда, независимо от уровня
+        Sawmill.Warning(message);
+    }
+    
+    /// <summary>
+    /// Логирование с учетом настроенного уровня
+    /// </summary>
+    protected void LogInfo(string message)
+    {
+        // Информационные сообщения логируем только если уровень >= 1
+        if (LogLevel >= 1)
+            Sawmill.Info(message);
+    }
+    
+    /// <summary>
+    /// Логирование с учетом настроенного уровня
+    /// </summary>
+    protected void LogDebug(string message)
+    {
+        // Отладочные сообщения логируем только если уровень >= 2
+        if (LogLevel >= 2)
+            Sawmill.Debug(message);
     }
 } 

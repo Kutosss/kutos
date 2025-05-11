@@ -2,10 +2,23 @@
 
 namespace Content.Shared.CCVar;
 
+/// <summary>
+/// CVars связанные с интеграцией Discord.
+/// </summary>
 public sealed partial class CCVars
 {
     /// <summary>
-    /// Глобальный выключатель для всех Discord вебхуков
+    ///     Discord webhook URL for ban notifications and other server alerts. Leave empty to disable. This is a secret! Do not share!
+    ///     Для использования добавьте в server_config.toml:
+    ///     [discord]
+    ///     webhook_url = "https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN"
+    ///     webhook_enabled = true
+    /// </summary>
+    public static readonly CVarDef<string> DiscordWebhookUrl =
+        CVarDef.Create("discord.webhook_url", string.Empty, CVar.SERVERONLY | CVar.CONFIDENTIAL);
+        
+    /// <summary>
+    ///     Whether to enable Discord webhook notifications.
     /// </summary>
     public static readonly CVarDef<bool> DiscordWebhookEnabled =
         CVarDef.Create("discord.webhook_enabled", true, CVar.SERVERONLY);
@@ -77,17 +90,8 @@ public sealed partial class CCVars
         CVarDef.Create("discord.auth_api_key", "", CVar.SERVERONLY | CVar.CONFIDENTIAL);
         
     /// <summary>
-    ///     Уровень логирования для Discord вебхуков
-    ///     0 - только ошибки
-    ///     1 - стандартная информация
-    ///     2 - подробная отладочная информация
+    ///     Log level for Discord webhook messages (0 - minimal, 1 - normal, 2 - verbose).
     /// </summary>
     public static readonly CVarDef<int> DiscordWebhookLogLevel =
         CVarDef.Create("discord.webhook_log_level", 1, CVar.SERVERONLY);
-
-    /// <summary>
-    /// URL Discord вебхука для уведомлений о банах (server bans)
-    /// </summary>
-    public static readonly CVarDef<string> DiscordBanWebhookUrl =
-        CVarDef.Create("discord.ban_webhook_url", string.Empty, CVar.SERVERONLY | CVar.CONFIDENTIAL);
 }
