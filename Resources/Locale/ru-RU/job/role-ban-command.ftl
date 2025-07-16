@@ -1,6 +1,6 @@
 ### Localization for role ban command
 
-cmd-roleban-desc = Запрещает пользователю играть на роли
+cmd-roleban-desc = Запрещает пользователю играть на ролях
 cmd-roleban-help = Использование: roleban <name or user ID> <job> <reason> [продолжительность в минутах, не указывать или 0 для навсегда] [use True for global ban, otherwise False]
 
 ## Completion result hints
@@ -18,7 +18,7 @@ cmd-roleban-hint-duration-6 = 1 месяц
 
 ### Localization for role unban command
 
-cmd-roleunban-desc = Возвращает пользователю возможность играть на роли
+cmd-roleunban-desc = Возвращает пользователю возможность играть на ролях
 cmd-roleunban-help = Использование: roleunban <role ban id>
 
 ## Completion result hints
@@ -39,7 +39,7 @@ cmd-roleban-arg-count = Недопустимое количество аргум
 cmd-roleban-job-parse = Работа { $job } не существует.
 cmd-roleban-name-parse = Невозможно найти игрока с таким именем.
 cmd-roleban-existing = { $target } уже имеет запрет на роль { $role }.
-cmd-roleban-success = { $target } запрещено играть на роли { $role } по причине { $reason } { $length }. Сервер { $server }.
+cmd-roleban-success = { $target } запрещено играть на роли { $role } по причине { $reason } { $length }.
 cmd-roleban-inf = навсегда
 cmd-roleban-until = до { $expires }
 # Department bans

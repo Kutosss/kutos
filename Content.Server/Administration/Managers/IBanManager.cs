@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Net;
 using System.Threading.Tasks;
+using Content.Server.Database;
 using Content.Shared.Database;
 using Content.Shared.Roles;
 using Robust.Shared.Network;
@@ -11,6 +14,16 @@ namespace Content.Server.Administration.Managers;
 
 public interface IBanManager
 {
+    /// <summary>
+    /// Событие, возникающее при добавлении нового бана
+    /// </summary>
+    public event Action<ServerBanDef>? BanAdded;
+    
+    /// <summary>
+    /// Событие, возникающее при добавлении нового ролевого бана
+    /// </summary>
+    public event Action<string, string, string, string, DateTimeOffset, DateTimeOffset?>? RoleBanAdded;
+    
     public void Initialize();
     public void Restart();
 
