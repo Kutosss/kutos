@@ -1,7 +1,7 @@
 <Document>
   # Таяры
 
-  Вся информация в этом документе лицензирована по CC BY-SA 4.0 и взята с [wiki.aurorastation.org](https://wiki.aurorastation.org/index.php?title=Tajaran), с адаптациями от SX-7 (GitHub).
+  Вся информация в этом документе лицензирована по CC BY-SA 4.0 и взята с <link href="https://wiki.aurorastation.org/index.php?title=Tajaran">wiki.aurorastation.org</link>, с адаптациями от SX-7 (GitHub).
 
   <Box>
     <GuideEntityEmbed Entity="MobTajaran" Caption=""/>
