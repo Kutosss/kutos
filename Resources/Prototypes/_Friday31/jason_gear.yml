@@ -1,0 +1,68 @@
+- type: entity
+  parent: Machete
+  id: JasonMachete
+  suffix: Unremoveable
+  components:
+  - type: Unremoveable
+
+- type: entity
+  parent: ClothingMaskWeldingGas
+  id: JasonMask
+  suffix: Unremoveable
+  components:
+  - type: Unremoveable
+
+- type: entity
+  parent: ClothingUniformJumpsuitExplorerDeltaV
+  id: JasonJumpsuit
+  suffix: Unremoveable
+  components:
+  - type: Unremoveable
+
+- type: entity
+  parent: ClothingOuterCoatJacketBiker
+  id: JasonJacket
+  suffix: Unremoveable
+  components:
+  - type: Unremoveable
+
+- type: entity
+  parent: ClothingShoesLeather
+  id: JasonShoes
+  suffix: Unremoveable
+  components:
+  - type: Unremoveable
+
+- type: entity
+  parent: ClothingHandsGlovesColorBlack
+  id: JasonGloves
+  suffix: Unremoveable
+  components:
+  - type: Unremoveable
+
+- type: entity
+  parent: ClothingBackpackDuffel
+  id: JasonBackpack
+  suffix: Unremoveable
+  components:
+  - type: Unremoveable
+
+- type: startingGear
+  id: JasonVoorheesGear
+  equipment:
+    mask: JasonMask
+    jumpsuit: JasonJumpsuit
+    outerClothing: JasonJacket
+    shoes: JasonShoes
+    gloves: JasonGloves
+    back: JasonBackpack
+  inhand:
+  - JasonMachete
+  storage:
+    back:
+    - BodyBagFolded
+    - BodyBagFolded
+    - BodyBagFolded
+    - BodyBagFolded
+    - BodyBagFolded
+    - CrayonRed
