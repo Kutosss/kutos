@@ -16,4 +16,21 @@ public sealed partial class PennywiseAbilityComponent : Component
 
     [ViewVariables(VVAccess.ReadWrite)]
     public EntityUid? PhaseToggleActionEntity;
+
+    [DataField]
+    public EntProtoId SpawnBalloonAction = "ActionPennywiseSpawnBalloon";
+
+    [ViewVariables(VVAccess.ReadWrite)]
+    public EntityUid? SpawnBalloonActionEntity;
+
+    [DataField]
+    public List<EntProtoId> BalloonPrototypes = new()
+    {
+        "BalloonSyn"
+    };
+
+    [DataField]
+    public float BalloonCooldown = 5f;
+
+    public TimeSpan LastBalloonSpawn = TimeSpan.Zero;
 }

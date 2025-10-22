@@ -25,3 +25,17 @@
     itemIconStyle: NoItem
     icon: Interface/Actions/manifest.png
     event: !type:PennywisePhaseToggleEvent
+
+- type: entity
+  id: ActionPennywiseSpawnBalloon
+  name: Создать шарик
+  description: Создает случайный воздушный шарик. Идеально для запугивания экипажа!
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: InstantAction
+    useDelay: 5
+    itemIconStyle: NoItem
+    icon:
+      sprite: Objects/Fun/toys.rsi
+      state: synb
+    event: !type:PennywiseSpawnBalloonEvent

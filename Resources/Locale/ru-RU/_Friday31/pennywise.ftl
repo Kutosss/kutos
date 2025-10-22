@@ -34,3 +34,5 @@ ent-ActionPennywiseChameleon = Маскировка оборотня
 ent-ActionPennywisePhaseToggle = Фазовый проход
     .desc = Переключает способность проходить сквозь стены. В фазовом режиме вы становитесь полупрозрачным и можете проходить сквозь препятствия.
 
+ent-ActionPennywiseSpawnBalloon = Создать шарик
+    .desc = Создает шарик.

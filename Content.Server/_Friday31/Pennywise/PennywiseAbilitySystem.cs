@@ -45,14 +45,15 @@ public sealed class PennywiseAbilitySystem : EntitySystem
         SubscribeLocalEvent<PennywiseAbilityComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<PennywiseAbilityComponent, PennywiseChameleonEvent>(OnChameleonDisguise);
         SubscribeLocalEvent<PennywiseAbilityComponent, PennywisePhaseToggleEvent>(OnPhaseToggle);
+        SubscribeLocalEvent<PennywiseAbilityComponent, PennywiseSpawnBalloonEvent>(OnSpawnBalloon);
     }
 
     private void OnMapInit(EntityUid uid, PennywiseAbilityComponent component, MapInitEvent args)
     {
         _actions.AddAction(uid, ref component.ChameleonActionEntity, component.ChameleonAction);
         _actions.AddAction(uid, ref component.PhaseToggleActionEntity, component.PhaseToggleAction);
+        _actions.AddAction(uid, ref component.SpawnBalloonActionEntity, component.SpawnBalloonAction);
         
-        // Добавляем компонент фазового состояния
         EnsureComp<PennywisePhaseComponent>(uid);
     }
 
@@ -63,7 +64,6 @@ public sealed class PennywiseAbilitySystem : EntitySystem
 
         var target = args.Target;
 
-        // Проверка возможности использования способности
         if (!_actionBlocker.CanInteract(uid, target))
             return;
 
@@ -98,10 +98,8 @@ public sealed class PennywiseAbilitySystem : EntitySystem
 
         _appearance.CopyData(target, disguise);
         
-        // Клонируем внешность гуманоидов
         if (TryComp<HumanoidAppearanceComponent>(target, out var sourceHumanoid))
         {
-            // Добавляем компонент гуманоида на маскировку, если его нет
             var targetHumanoid = EnsureComp<HumanoidAppearanceComponent>(disguise);
             _humanoid.CloneAppearance(target, disguise, sourceHumanoid, targetHumanoid);
         }
@@ -131,12 +129,10 @@ public sealed class PennywiseAbilitySystem : EntitySystem
         if (!TryComp<PennywisePhaseComponent>(uid, out var phaseComp))
             return;
 
-        // Проверяем кулдаун
         var currentTime = _timing.CurTime;
         if ((currentTime - phaseComp.LastToggleTime).TotalSeconds < phaseComp.Cooldown)
             return;
 
-        // Проверяем, что у нас есть компонент физики
         if (!TryComp<FixturesComponent>(uid, out var fixtures) || fixtures.FixtureCount < 1)
             return;
 
@@ -147,38 +143,54 @@ public sealed class PennywiseAbilitySystem : EntitySystem
 
         if (phaseComp.IsPhasing)
         {
-            // Включаем проход сквозь стены
             _physics.SetHard(uid, fixture.Value, false, fixtures);
             _physics.SetCollisionMask(uid, fixture.Key, fixture.Value, (int)CollisionGroup.GhostImpassable, fixtures);
             _physics.SetCollisionLayer(uid, fixture.Key, fixture.Value, 0, fixtures);
             
-            // Делаем полупрозрачным
             if (TryComp<VisibilityComponent>(uid, out var visibility))
             {
                 _visibility.AddLayer((uid, visibility), (int)VisibilityFlags.Ghost, false);
                 _visibility.RefreshVisibility(uid, visibility);
             }
             
-            // Визуальный эффект
             _appearance.SetData(uid, RevenantVisuals.Corporeal, false);
         }
         else
         {
-            // Выключаем проход сквозь стены
             _physics.SetHard(uid, fixture.Value, true, fixtures);
             _physics.SetCollisionMask(uid, fixture.Key, fixture.Value, (int)CollisionGroup.SmallMobMask, fixtures);
             _physics.SetCollisionLayer(uid, fixture.Key, fixture.Value, (int)CollisionGroup.SmallMobLayer, fixtures);
             
-            // Делаем полностью видимым
             if (TryComp<VisibilityComponent>(uid, out var visibility))
             {
                 _visibility.RemoveLayer((uid, visibility), (int)VisibilityFlags.Ghost, false);
                 _visibility.RefreshVisibility(uid, visibility);
             }
             
-            // Визуальный эффект
             _appearance.SetData(uid, RevenantVisuals.Corporeal, true);
         }
+
+        args.Handled = true;
+    }
+
+    private void OnSpawnBalloon(EntityUid uid, PennywiseAbilityComponent component, PennywiseSpawnBalloonEvent args)
+    {
+        if (args.Handled)
+            return;
+
+        var currentTime = _timing.CurTime;
+        if ((currentTime - component.LastBalloonSpawn).TotalSeconds < component.BalloonCooldown)
+            return;
+
+        if (component.BalloonPrototypes.Count == 0)
+            return;
+
+        var random = new System.Random();
+        var balloonProto = component.BalloonPrototypes[random.Next(component.BalloonPrototypes.Count)];
+
+        var balloon = Spawn(balloonProto, Transform(uid).Coordinates);
+        
+        component.LastBalloonSpawn = currentTime;
 
         args.Handled = true;
     }
