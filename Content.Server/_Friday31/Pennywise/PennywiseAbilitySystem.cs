@@ -54,7 +54,8 @@ public sealed class PennywiseAbilitySystem : EntitySystem
         _actions.AddAction(uid, ref component.PhaseToggleActionEntity, component.PhaseToggleAction);
         _actions.AddAction(uid, ref component.SpawnBalloonActionEntity, component.SpawnBalloonAction);
         
-        EnsureComp<PennywisePhaseComponent>(uid);
+        var phaseComp = EnsureComp<PennywisePhaseComponent>(uid);
+        _actions.SetToggled(component.PhaseToggleActionEntity, phaseComp.IsPhasing);
     }
 
     private void OnChameleonDisguise(EntityUid uid, PennywiseAbilityComponent component, PennywiseChameleonEvent args)
@@ -169,6 +170,8 @@ public sealed class PennywiseAbilitySystem : EntitySystem
             
             _appearance.SetData(uid, RevenantVisuals.Corporeal, true);
         }
+
+        _actions.SetToggled(component.PhaseToggleActionEntity, phaseComp.IsPhasing);
 
         args.Handled = true;
     }

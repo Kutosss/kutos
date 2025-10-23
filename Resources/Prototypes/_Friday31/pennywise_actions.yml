@@ -23,7 +23,12 @@
   - type: InstantAction
     useDelay: 3
     itemIconStyle: NoItem
-    icon: Interface/Actions/manifest.png
+    icon:
+      sprite: Interface/Actions/actions_ai.rsi
+      state: bolt_door
+    iconOn:
+      sprite: Interface/Actions/actions_ai.rsi
+      state: unbolt_door
     event: !type:PennywisePhaseToggleEvent
 
 - type: entity
