@@ -1,13 +1,35 @@
 - type: entity
-  parent: Machete
-  id: JasonMachete
+  parent: ClothingMaskBase
+  id: ClothingMaskHorror
+  name: Жуткая хоккейная маска
+  description: Ужасающая маска, вселяющая страх в сердца тех, кто ее видит.
+  components:
+  - type: Sprite
+    sprite: _Friday31/Clothing/Mask/horror-mask.rsi
+    state: icon
+  - type: Clothing
+    sprite: _Friday31/Clothing/Mask/horror-mask.rsi
+    clothingVisuals:
+      mask:
+      - state: mask-on
+  - type: IdentityBlocker
+  - type: Tag
+    tags:
+    - WhitelistChameleon
+  - type: FlavorProfile
+    flavors:
+    - plastic
+
+- type: entity
+  parent: ClothingMaskHorror
+  id: JasonHorrorMask
   suffix: Unremoveable
   components:
   - type: Unremoveable
 
 - type: entity
-  parent: ClothingMaskWeldingGas
-  id: JasonMask
+  parent: Machete
+  id: JasonMachete
   suffix: Unremoveable
   components:
   - type: Unremoveable
@@ -50,7 +72,7 @@
 - type: startingGear
   id: JasonVoorheesGear
   equipment:
-    mask: JasonMask
+    mask: JasonHorrorMask
     jumpsuit: JasonJumpsuit
     outerClothing: JasonJacket
     shoes: JasonShoes
