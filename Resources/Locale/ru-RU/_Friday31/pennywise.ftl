@@ -1,21 +1,4 @@
-ent-ClothingMaskPennywise = маска Пеннивайза
-    .desc = Жуткая клоунская маска.
-ent-ClothingMaskPennywiseUnremoveable = маска Пеннивайза
-    .desc = Жуткая клоунская маска. Её невозможно снять.
-    .suffix = Неснимаемая
 
-ent-ClothingUniformJumpsuitPennywise = костюм клоуна
-    .desc = Клоунский костюм.
-    .suffix = Неснимаемый
-ent-ClothingBackpackPennywise = рюкзак клоуна
-    .desc = Рюкзак для хранения хонков.
-    .suffix = Неснимаемый
-ent-ClothingShoesPennywise = ботинки клоуна
-    .desc = Большие забавные ботинки.
-    .suffix = Неснимаемые
-ent-ClothingHeadsetPennywise = гарнитура сервиса
-    .desc = Гарнитура для связи.
-    .suffix = Неснимаемая
 
 ent-MobPennywise = Пеннивайз
     .desc = Мы все здесь плаваем... и ты тоже будешь плавать.
