@@ -32,7 +32,7 @@
   parent: ClothingUniformBase
   id: ClothingUniformJumpsuitPennywise
   name: костюм Пеннивайза
-  description: Яркий клоунский костюм Пеннивайза.
+  description: Персик соси хуй
   suffix: Unremoveable
   noSpawn: true
   components:
@@ -56,7 +56,7 @@
   parent: ClothingShoesBase
   id: ClothingShoesPennywise
   name: ботинки Пеннивайза
-  description: Большие яркие клоунские ботинки.
+  description: Персик соси хуй
   suffix: Unremoveable
   noSpawn: true
   components:
