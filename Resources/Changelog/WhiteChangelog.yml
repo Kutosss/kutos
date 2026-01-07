@@ -4803,3 +4803,113 @@ Entries:
   id: 506
   time: '2025-12-30T14:00:31.0000000+00:00'
   url: https://github.com/WWhiteDreamProject/wwdpublic/pull/988
+- author: vanx
+  changes:
+    - type: Fix
+      message: Толчок теперь отменяет граб только при выпадении дизарма.
+    - type: Tweak
+      message: Кулдаун освобождения из граба уменьшен 3 -> 2 секунды.
+    - type: Tweak
+      message: >-
+        Базовый шанс вырваться из лёгкого граба 100% -> 50%, из сильного 50% ->
+        30%.
+  id: 507
+  time: '2025-12-31T11:32:53.0000000+00:00'
+  url: https://github.com/WWhiteDreamProject/wwdpublic/pull/978
+- author: vanx
+  changes:
+    - type: Tweak
+      message: >-
+        Изменён ассортимент отдела карго: убраны боевые скафандры, добавлен ящик
+        с винтовками Мосина за $3000.
+  id: 508
+  time: '2025-12-31T11:39:47.0000000+00:00'
+  url: https://github.com/WWhiteDreamProject/wwdpublic/pull/991
+- author: SentryPrimies
+  changes:
+    - type: Add
+      message: Добавлены новые спрайты подстанциям
+    - type: Add
+      message: 'Добавлены новые спрайты заряжалкам '
+  id: 509
+  time: '2025-12-31T16:00:42.0000000+00:00'
+  url: https://github.com/WWhiteDreamProject/wwdpublic/pull/977
+- author: vanx
+  changes:
+    - type: Add
+      message: >-
+        Аварийные лампы теперь светят заметнее и издают звуки в зависимости от
+        кода угрозы станции.
+  id: 510
+  time: '2026-01-01T19:27:05.0000000+00:00'
+  url: https://github.com/WWhiteDreamProject/wwdpublic/pull/940
+- author: vanx
+  changes:
+    - type: Fix
+      message: Барки больше не озвучивают язык жестов.
+  id: 511
+  time: '2026-01-03T19:58:15.0000000+00:00'
+  url: https://github.com/WWhiteDreamProject/wwdpublic/pull/974
+- author: vanx
+  changes:
+    - type: Remove
+      message: >-
+        Блок управления костюмом инфильтратора синдиката больше не имеет слотов
+        инвентаря.
+    - type: Fix
+      message: >-
+        Отрисовка слоёв одежды, теперь кобура корректно отрисовывается под
+        верхней одеждой.
+    - type: Add
+      message: >-
+        Кобура детектива и кобура синдиката теперь "скрытные" и их не видно при
+        осмотре, а при обыске в их слоте отображается [ ? ].
+    - type: Fix
+      message: >-
+        Блок управления костюмом инфильтратора синдиката теперь аналогично видно
+        при обыске как [ ? ].
+    - type: Tweak
+      message: Уменьшены значения защиты костюма инфильтратора синдиката, 50% -> 30%.
+  id: 512
+  time: '2026-01-03T20:02:10.0000000+00:00'
+  url: https://github.com/WWhiteDreamProject/wwdpublic/pull/995
+- author: kekoven1
+  changes:
+    - type: Fix
+      message: Полиморф копирует метаданные
+  id: 513
+  time: '2026-01-03T20:08:21.0000000+00:00'
+  url: https://github.com/WWhiteDreamProject/wwdpublic/pull/998
+- author: vanx
+  changes:
+    - type: Fix
+      message: Дробовик Силовик снова самозарядный.
+    - type: Fix
+      message: Пистолет-пулемёт C20-R теперь берётся в 2 руки.
+    - type: Tweak
+      message: Винтовка Мосина теперь вмещает максимум 5 патронов.
+  id: 514
+  time: '2026-01-03T20:16:18.0000000+00:00'
+  url: https://github.com/WWhiteDreamProject/wwdpublic/pull/1003
+- author: Cinkafox
+  changes:
+    - type: Fix
+      message: Исправление стилей в чате лобби
+    - type: Tweak
+      message: Перенесен предпросмотр персонажа в профиль эдиторе
+    - type: Tweak
+      message: Перенесены маркапы и лоадауты
+    - type: Remove
+      message: Говнокод лоадаутов
+    - type: Add
+      message: Читаемый лоадауты
+  id: 515
+  time: '2026-01-04T21:33:01.0000000+00:00'
+  url: https://github.com/WWhiteDreamProject/wwdpublic/pull/1001
+- author: Cinkafox
+  changes:
+    - type: Add
+      message: Добавлена менюшка выбора рас
+  id: 516
+  time: '2026-01-06T13:57:29.0000000+00:00'
+  url: https://github.com/WWhiteDreamProject/wwdpublic/pull/1009
